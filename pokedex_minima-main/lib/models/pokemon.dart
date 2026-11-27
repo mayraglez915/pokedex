@@ -1,4 +1,3 @@
-
 class Pokemon {
   final int id;
   final String nombre;
@@ -34,11 +33,6 @@ class Pokemon {
       stats[item['stat']['name']] = item['base_stat'];
     }
 
-    final movimientos = (json['moves'] as List? ?? [])
-        .take(5)
-        .map((item) => item['move']['name'].toString())
-        .toList();
-
     return Pokemon(
       id: json['id'] ?? 0,
       nombre: json['name'] ?? '',
@@ -55,7 +49,10 @@ class Pokemon {
           .map((item) => item['ability']['name'].toString())
           .toList(),
       estadisticas: stats,
-      movimientos: movimientos,
+      movimientos: (json['moves'] as List? ?? [])
+          .take(5)
+          .map((item) => item['move']['name'].toString())
+          .toList(),
     );
   }
 }

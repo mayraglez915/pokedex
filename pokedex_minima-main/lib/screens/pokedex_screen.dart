@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 import '../services/pokeapi_service.dart';
@@ -85,6 +84,9 @@ class _PokedexScreenState extends State<PokedexScreen> {
                               padding: const EdgeInsets.all(16),
                               child: Column(
                                 children: [
+                                  Text('#${p.id}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold)),
                                   if (p.imagen.isNotEmpty)
                                     Image.network(p.imagen, height: 150),
                                   Text(p.nombre.toUpperCase(),
@@ -113,12 +115,11 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                       style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),
-                                  ...p.movimientos.map(
-                                    (movimiento) => ListTile(
-                                      leading: const Icon(Icons.flash_on),
-                                      title: Text(movimiento),
-                                    ),
-                                  ),
+                                  ...p.movimientos.map((m) => ListTile(
+                                        leading:
+                                            const Icon(Icons.flash_on),
+                                        title: Text(m),
+                                      )),
                                 ],
                               ),
                             ),
