@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 import '../services/pokeapi_service.dart';
@@ -17,9 +18,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
   void _buscar() {
     final nombre = _controlador.text.trim();
     if (nombre.isEmpty) return;
-    setState(() {
-      _futuroPokemon = _servicio.obtenerPokemon(nombre);
-    });
+    setState(() => _futuroPokemon = _servicio.obtenerPokemon(nombre));
   }
 
   Widget _dato(String titulo, String valor) {
@@ -59,9 +58,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
             ),
             const SizedBox(height: 10),
             FilledButton(
-              onPressed: _buscar,
-              child: const Text('Buscar Pokémon'),
-            ),
+                onPressed: _buscar,
+                child: const Text('Buscar Pokémon')),
             const SizedBox(height: 16),
             Expanded(
               child: _futuroPokemon == null
@@ -79,31 +77,32 @@ class _PokedexScreenState extends State<PokedexScreen> {
                               child: Text('No se encontró el Pokémon'));
                         }
 
-                        final pokemon = snapshot.data!;
+                        final p = snapshot.data!;
                         return SingleChildScrollView(
                           child: Card(
                             child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Column(
                                 children: [
-                                  if (pokemon.imagen.isNotEmpty)
-                                    Image.network(pokemon.imagen,
-                                        height: 150),
-                                  Text(pokemon.nombre.toUpperCase(),
+                                  if (p.imagen.isNotEmpty)
+                                    Image.network(p.imagen, height: 150),
+                                  Text(p.nombre.toUpperCase(),
                                       style: const TextStyle(
                                           fontSize: 24,
                                           fontWeight: FontWeight.bold)),
-                                  _dato('Tipos', pokemon.tipos.join(', ')),
-                                  _dato('Altura', '${pokemon.altura} m'),
-                                  _dato('Peso', '${pokemon.peso} kg'),
+                                  _dato('Tipos', p.tipos.join(', ')),
+                                  _dato('Altura', '${p.altura} m'),
+                                  _dato('Peso', '${p.peso} kg'),
                                   _dato('Experiencia',
-                                      '${pokemon.experiencia} puntos'),
+                                      '${p.experiencia} puntos'),
                                   _dato('Habilidades',
-                                      pokemon.habilidades.join(', ')),
+                                      p.habilidades.join(', ')),
                                   _dato('Ataque',
-                                      '${pokemon.estadisticas['attack'] ?? 0}'),
+                                      '${p.estadisticas['attack'] ?? 0}'),
                                   _dato('Defensa',
-                                      '${pokemon.estadisticas['defense'] ?? 0}'),
+                                      '${p.estadisticas['defense'] ?? 0}'),
+                                  _dato('Velocidad',
+                                      '${p.estadisticas['speed'] ?? 0}'),
                                 ],
                               ),
                             ),
