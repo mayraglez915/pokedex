@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 import '../services/pokeapi_service.dart';
@@ -21,14 +20,53 @@ class _PokedexScreenState extends State<PokedexScreen> {
     setState(() => _futuroPokemon = _servicio.obtenerPokemon(nombre));
   }
 
+  Color _colorTipo(String tipo) {
+    switch (tipo.toLowerCase()) {
+      case 'fire':
+        return Colors.deepOrange;
+      case 'water':
+        return Colors.blue;
+      case 'grass':
+        return Colors.green;
+      case 'electric':
+        return Colors.amber;
+      case 'psychic':
+        return Colors.purple;
+      case 'ice':
+        return Colors.cyan;
+      case 'fighting':
+        return Colors.brown;
+      case 'poison':
+        return Colors.deepPurple;
+      case 'ground':
+        return Colors.orange;
+      case 'rock':
+        return Colors.blueGrey;
+      case 'fairy':
+        return Colors.pink;
+      case 'flying':
+        return Colors.indigo;
+      case 'bug':
+        return Colors.lightGreen;
+      case 'ghost':
+        return Colors.deepPurpleAccent;
+      case 'dragon':
+        return Colors.teal;
+      case 'dark':
+        return Colors.black87;
+      case 'steel':
+        return Colors.grey;
+      default:
+        return Colors.green;
+    }
+  }
+
   Widget _dato(String titulo, String valor) {
     return ListTile(
       dense: true,
       title: Text(titulo),
-      trailing: Text(
-        valor,
-        style: const TextStyle(fontWeight: FontWeight.bold),
-      ),
+      trailing: Text(valor,
+          style: const TextStyle(fontWeight: FontWeight.bold)),
     );
   }
 
@@ -89,8 +127,13 @@ class _PokedexScreenState extends State<PokedexScreen> {
                         }
 
                         final p = snapshot.data!;
+                        final color = p.tipos.isNotEmpty
+                            ? _colorTipo(p.tipos.first)
+                            : Colors.green;
+
                         return SingleChildScrollView(
                           child: Card(
+                            color: color.withOpacity(0.12),
                             child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Column(
@@ -105,8 +148,17 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                       style: const TextStyle(
                                           fontSize: 25,
                                           fontWeight: FontWeight.bold)),
+                                  Wrap(
+                                    spacing: 8,
+                                    children: p.tipos.map((tipo) {
+                                      return Chip(
+                                        label: Text(tipo.toUpperCase()),
+                                        backgroundColor:
+                                            _colorTipo(tipo).withOpacity(0.25),
+                                      );
+                                    }).toList(),
+                                  ),
                                   _seccion('Información general', [
-                                    _dato('Tipos', p.tipos.join(', ')),
                                     _dato('Altura', '${p.altura} m'),
                                     _dato('Peso', '${p.peso} kg'),
                                     _dato('Experiencia',
@@ -115,6 +167,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                         p.habilidades.join(', ')),
                                   ]),
                                   _seccion('Estadísticas', [
+                                    _dato('Vida',
+                                        '${p.estadisticas['hp'] ?? 0}'),
                                     _dato('Ataque',
                                         '${p.estadisticas['attack'] ?? 0}'),
                                     _dato('Defensa',
@@ -125,17 +179,13 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                         '${p.estadisticas['special-attack'] ?? 0}'),
                                     _dato('Defensa especial',
                                         '${p.estadisticas['special-defense'] ?? 0}'),
-                                    _dato('Vida',
-                                        '${p.estadisticas['hp'] ?? 0}'),
                                   ]),
                                   _seccion('Movimientos', [
-                                    ...p.movimientos.map(
-                                      (m) => ListTile(
-                                        leading:
-                                            const Icon(Icons.flash_on),
-                                        title: Text(m),
-                                      ),
-                                    ),
+                                    ...p.movimientos.map((m) => ListTile(
+                                          leading:
+                                              const Icon(Icons.flash_on),
+                                          title: Text(m),
+                                        )),
                                   ]),
                                 ],
                               ),
@@ -149,5 +199,5 @@ class _PokedexScreenState extends State<PokedexScreen> {
         ),
       ),
     );
-  }
+     }
 }
