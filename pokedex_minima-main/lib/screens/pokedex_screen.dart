@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 import '../services/pokeapi_service.dart';
@@ -105,6 +104,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                       '${p.estadisticas['speed'] ?? 0}'),
                                   _dato('Ataque especial',
                                       '${p.estadisticas['special-attack'] ?? 0}'),
+                                  _dato('Defensa especial',
+                                      '${p.estadisticas['special-defense'] ?? 0}'),
                                 ],
                               ),
                             ),
