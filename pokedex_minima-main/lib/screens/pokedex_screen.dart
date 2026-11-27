@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 import '../services/pokeapi_service.dart';
@@ -13,14 +12,11 @@ class PokedexScreen extends StatefulWidget {
 class _PokedexScreenState extends State<PokedexScreen> {
   final TextEditingController _controlador = TextEditingController();
   final PokeApiService _servicio = PokeApiService();
-
   Future<Pokemon>? _futuroPokemon;
 
   void _buscar() {
     final nombre = _controlador.text.trim();
-
     if (nombre.isEmpty) return;
-
     setState(() {
       _futuroPokemon = _servicio.obtenerPokemon(nombre);
     });
@@ -78,14 +74,12 @@ class _PokedexScreenState extends State<PokedexScreen> {
                           return const Center(
                               child: CircularProgressIndicator());
                         }
-
                         if (snapshot.hasError) {
                           return const Center(
                               child: Text('No se encontró el Pokémon'));
                         }
 
                         final pokemon = snapshot.data!;
-
                         return SingleChildScrollView(
                           child: Card(
                             child: Padding(
@@ -93,20 +87,12 @@ class _PokedexScreenState extends State<PokedexScreen> {
                               child: Column(
                                 children: [
                                   if (pokemon.imagen.isNotEmpty)
-                                    Image.network(
-                                      pokemon.imagen,
-                                      height: 150,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Icon(Icons.catching_pokemon,
-                                              size: 100),
-                                    ),
-                                  Text(
-                                    pokemon.nombre.toUpperCase(),
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                    Image.network(pokemon.imagen,
+                                        height: 150),
+                                  Text(pokemon.nombre.toUpperCase(),
+                                      style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold)),
                                   _dato('Tipos', pokemon.tipos.join(', ')),
                                   _dato('Altura', '${pokemon.altura} m'),
                                   _dato('Peso', '${pokemon.peso} kg'),
@@ -116,6 +102,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                       pokemon.habilidades.join(', ')),
                                   _dato('Ataque',
                                       '${pokemon.estadisticas['attack'] ?? 0}'),
+                                  _dato('Defensa',
+                                      '${pokemon.estadisticas['defense'] ?? 0}'),
                                 ],
                               ),
                             ),
