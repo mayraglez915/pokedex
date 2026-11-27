@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import '../models/pokemon.dart';
 import '../services/pokeapi_service.dart';
@@ -21,16 +22,26 @@ class _PokedexScreenState extends State<PokedexScreen> {
   }
 
   Widget _dato(String titulo, String valor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('$titulo: ',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          Expanded(child: Text(valor)),
-        ],
+    return ListTile(
+      dense: true,
+      title: Text(titulo),
+      trailing: Text(
+        valor,
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
+    );
+  }
+
+  Widget _seccion(String titulo, List<Widget> elementos) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Divider(),
+        Text(titulo,
+            style: const TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold)),
+        ...elementos,
+      ],
     );
   }
 
@@ -60,7 +71,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
             FilledButton(
                 onPressed: _buscar,
                 child: const Text('Buscar Pokémon')),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Expanded(
               child: _futuroPokemon == null
                   ? const Center(child: Text('Busca un Pokémon'))
@@ -86,40 +97,46 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                 children: [
                                   Text('#${p.id}',
                                       style: const TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  if (p.imagen.isNotEmpty)
-                                    Image.network(p.imagen, height: 150),
-                                  Text(p.nombre.toUpperCase(),
-                                      style: const TextStyle(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold)),
-                                  _dato('Tipos', p.tipos.join(', ')),
-                                  _dato('Altura', '${p.altura} m'),
-                                  _dato('Peso', '${p.peso} kg'),
-                                  _dato('Experiencia',
-                                      '${p.experiencia} puntos'),
-                                  _dato('Habilidades',
-                                      p.habilidades.join(', ')),
-                                  _dato('Ataque',
-                                      '${p.estadisticas['attack'] ?? 0}'),
-                                  _dato('Defensa',
-                                      '${p.estadisticas['defense'] ?? 0}'),
-                                  _dato('Velocidad',
-                                      '${p.estadisticas['speed'] ?? 0}'),
-                                  _dato('Ataque especial',
-                                      '${p.estadisticas['special-attack'] ?? 0}'),
-                                  _dato('Defensa especial',
-                                      '${p.estadisticas['special-defense'] ?? 0}'),
-                                  const Divider(),
-                                  const Text('Movimientos',
-                                      style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold)),
-                                  ...p.movimientos.map((m) => ListTile(
+                                  if (p.imagen.isNotEmpty)
+                                    Image.network(p.imagen, height: 160),
+                                  Text(p.nombre.toUpperCase(),
+                                      style: const TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.bold)),
+                                  _seccion('Información general', [
+                                    _dato('Tipos', p.tipos.join(', ')),
+                                    _dato('Altura', '${p.altura} m'),
+                                    _dato('Peso', '${p.peso} kg'),
+                                    _dato('Experiencia',
+                                        '${p.experiencia} puntos'),
+                                    _dato('Habilidades',
+                                        p.habilidades.join(', ')),
+                                  ]),
+                                  _seccion('Estadísticas', [
+                                    _dato('Ataque',
+                                        '${p.estadisticas['attack'] ?? 0}'),
+                                    _dato('Defensa',
+                                        '${p.estadisticas['defense'] ?? 0}'),
+                                    _dato('Velocidad',
+                                        '${p.estadisticas['speed'] ?? 0}'),
+                                    _dato('Ataque especial',
+                                        '${p.estadisticas['special-attack'] ?? 0}'),
+                                    _dato('Defensa especial',
+                                        '${p.estadisticas['special-defense'] ?? 0}'),
+                                    _dato('Vida',
+                                        '${p.estadisticas['hp'] ?? 0}'),
+                                  ]),
+                                  _seccion('Movimientos', [
+                                    ...p.movimientos.map(
+                                      (m) => ListTile(
                                         leading:
                                             const Icon(Icons.flash_on),
                                         title: Text(m),
-                                      )),
+                                      ),
+                                    ),
+                                  ]),
                                 ],
                               ),
                             ),
