@@ -25,6 +25,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('$titulo: ',
               style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -105,6 +106,19 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                       '${p.estadisticas['speed'] ?? 0}'),
                                   _dato('Ataque especial',
                                       '${p.estadisticas['special-attack'] ?? 0}'),
+                                  _dato('Defensa especial',
+                                      '${p.estadisticas['special-defense'] ?? 0}'),
+                                  const Divider(),
+                                  const Text('Movimientos',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold)),
+                                  ...p.movimientos.map(
+                                    (movimiento) => ListTile(
+                                      leading: const Icon(Icons.flash_on),
+                                      title: Text(movimiento),
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
