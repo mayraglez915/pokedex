@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-
 import '../models/pokemon.dart';
 import '../services/pokeapi_service.dart';
 
@@ -12,17 +11,27 @@ class PokedexScreen extends StatefulWidget {
 }
 
 class _PokedexScreenState extends State<PokedexScreen> {
-  final _controlador = TextEditingController();
+  final TextEditingController _controlador = TextEditingController();
+  final PokeApiService _servicio = PokeApiService();
   Future<Pokemon>? _futuroPokemon;
 
   void _buscar() {
-    final texto = _controlador.text.trim();
+    final nombre = _controlador.text.trim();
+    if (nombre.isEmpty) return;
+    setState(() => _futuroPokemon = _servicio.obtenerPokemon(nombre));
+  }
 
-    if (texto.isEmpty) return;
-
-    setState(() {
-      _futuroPokemon = obtenerPokemon(texto);
-    });
+  Widget _dato(String titulo, String valor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Text('$titulo: ',
+              style: const TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(child: Text(valor)),
+        ],
+      ),
+    );
   }
 
   @override
@@ -34,9 +43,7 @@ class _PokedexScreenState extends State<PokedexScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pokédex mínima'),
-      ),
+      appBar: AppBar(title: const Text('Pokédex mínima')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -44,115 +51,63 @@ class _PokedexScreenState extends State<PokedexScreen> {
             TextField(
               controller: _controlador,
               decoration: const InputDecoration(
-                labelText: 'Nombre o número del Pokémon',
+                labelText: 'Nombre del Pokémon',
                 border: OutlineInputBorder(),
               ),
-              textInputAction: TextInputAction.search,
               onSubmitted: (_) => _buscar(),
             ),
-
-            const SizedBox(height: 12),
-
+            const SizedBox(height: 10),
             FilledButton(
-              onPressed: _buscar,
-              child: const Text('Buscar'),
-            ),
-
-            const SizedBox(height: 24),
-
+                onPressed: _buscar,
+                child: const Text('Buscar Pokémon')),
+            const SizedBox(height: 16),
             Expanded(
               child: _futuroPokemon == null
-                  ? const Center(
-                      child: Text(
-                        'Escribe un nombre y presiona Buscar',
-                      ),
-                    )
+                  ? const Center(child: Text('Busca un Pokémon'))
                   : FutureBuilder<Pokemon>(
                       future: _futuroPokemon,
                       builder: (context, snapshot) {
-
-                        // Estado de carga
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                              child: CircularProgressIndicator());
                         }
-
-                        // Estado de error
                         if (snapshot.hasError) {
-                          return Center(
-                            child: Text(
-                              'Error: ${snapshot.error}',
-                              textAlign: TextAlign.center,
-                            ),
-                          );
+                          return const Center(
+                              child: Text('No se encontró el Pokémon'));
                         }
 
-                        // Estado de éxito
-                        if (snapshot.hasData) {
-                          final pokemon = snapshot.data!;
-
-                          return SingleChildScrollView(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.network(
-                                  pokemon.imagen,
-                                  height: 180,
-                                  errorBuilder:
-                                      (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.image_not_supported,
-                                      size: 100,
-                                    );
-                                  },
-                                ),
-
-                                const SizedBox(height: 12),
-
-                                Text(
-                                  '#${pokemon.id} - ${pokemon.nombre}',
-                                  style: const TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Wrap(
-                                  alignment: WrapAlignment.center,
-                                  children: pokemon.tipos.map((tipo) {
-                                    return Chip(
-                                      label: Text(tipo),
-                                    );
-                                  }).toList(),
-                                ),
-
-                                const SizedBox(height: 16),
-
-                                Text(
-                                  'Altura: ${pokemon.altura.toStringAsFixed(1)} m',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                  ),
-                                ),
-
-                                const SizedBox(height: 8),
-
-                                Text(
-                                  'Peso: ${pokemon.peso.toStringAsFixed(1)} kg',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                  ),
-                                ),
-                              ],
+                        final p = snapshot.data!;
+                        return SingleChildScrollView(
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                children: [
+                                  if (p.imagen.isNotEmpty)
+                                    Image.network(p.imagen, height: 150),
+                                  Text(p.nombre.toUpperCase(),
+                                      style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold)),
+                                  _dato('Tipos', p.tipos.join(', ')),
+                                  _dato('Altura', '${p.altura} m'),
+                                  _dato('Peso', '${p.peso} kg'),
+                                  _dato('Experiencia',
+                                      '${p.experiencia} puntos'),
+                                  _dato('Habilidades',
+                                      p.habilidades.join(', ')),
+                                  _dato('Ataque',
+                                      '${p.estadisticas['attack'] ?? 0}'),
+                                  _dato('Defensa',
+                                      '${p.estadisticas['defense'] ?? 0}'),
+                                  _dato('Velocidad',
+                                      '${p.estadisticas['speed'] ?? 0}'),
+                                ],
+                              ),
                             ),
-                          );
-                        }
-
-                        return const SizedBox.shrink();
+                          ),
+                        );
                       },
                     ),
             ),
