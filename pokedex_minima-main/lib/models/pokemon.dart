@@ -1,3 +1,4 @@
+
 class Pokemon {
   final int id;
   final String nombre;
@@ -24,34 +25,32 @@ class Pokemon {
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
-    final sprites = json['sprites'] ?? {};
-    final other = sprites['other'] ?? {};
-    final artwork = other['official-artwork'] ?? {};
-
-    final stats = <String, int>{};
-    for (final item in (json['stats'] as List? ?? [])) {
-      stats[item['stat']['name']] = item['base_stat'];
-    }
-
     return Pokemon(
-      id: json['id'] ?? 0,
-      nombre: json['name'] ?? '',
-      imagen: artwork['front_default'] ??
-          sprites['front_default'] ??
+      id: json['id'],
+      nombre: json['name'],
+      imagen: json['sprites']['other']['official-artwork']
+              ['front_default'] ??
+          json['sprites']['front_default'] ??
           '',
-      tipos: (json['types'] as List? ?? [])
+      tipos: (json['types'] as List)
           .map((tipo) => tipo['type']['name'].toString())
           .toList(),
-      altura: (json['height'] ?? 0) / 10,
-      peso: (json['weight'] ?? 0) / 10,
+      altura: (json['height'] as num).toDouble() / 10,
+      peso: (json['weight'] as num).toDouble() / 10,
       experiencia: json['base_experience'] ?? 0,
-      habilidades: (json['abilities'] as List? ?? [])
-          .map((item) => item['ability']['name'].toString())
+      habilidades: (json['abilities'] as List)
+          .map((habilidad) =>
+              habilidad['ability']['name'].toString())
           .toList(),
-      estadisticas: stats,
-      movimientos: (json['moves'] as List? ?? [])
-          .take(5)
-          .map((item) => item['move']['name'].toString())
+      estadisticas: {
+        for (var stat in json['stats'])
+          stat['stat']['name'].toString():
+              stat['base_stat'] as int,
+      },
+      movimientos: (json['moves'] as List)
+          .take(10)
+          .map((movimiento) =>
+              movimiento['move']['name'].toString())
           .toList(),
     );
   }
