@@ -9,6 +9,7 @@ class Pokemon {
   final int experiencia;
   final List<String> habilidades;
   final Map<String, int> estadisticas;
+  final List<String> movimientos;
 
   Pokemon({
     required this.id,
@@ -20,6 +21,7 @@ class Pokemon {
     required this.experiencia,
     required this.habilidades,
     required this.estadisticas,
+    required this.movimientos,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,11 @@ class Pokemon {
     for (final item in (json['stats'] as List? ?? [])) {
       stats[item['stat']['name']] = item['base_stat'];
     }
+
+    final movimientos = (json['moves'] as List? ?? [])
+        .take(5)
+        .map((item) => item['move']['name'].toString())
+        .toList();
 
     return Pokemon(
       id: json['id'] ?? 0,
@@ -48,6 +55,7 @@ class Pokemon {
           .map((item) => item['ability']['name'].toString())
           .toList(),
       estadisticas: stats,
+      movimientos: movimientos,
     );
   }
 }
