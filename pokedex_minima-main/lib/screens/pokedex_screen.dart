@@ -103,6 +103,8 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                       '${p.estadisticas['defense'] ?? 0}'),
                                   _dato('Velocidad',
                                       '${p.estadisticas['speed'] ?? 0}'),
+                                  _dato('Ataque especial',
+                                      '${p.estadisticas['special-attack'] ?? 0}'),
                                 ],
                               ),
                             ),
