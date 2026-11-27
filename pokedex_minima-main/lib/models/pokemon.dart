@@ -21,6 +21,8 @@ class Pokemon {
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
+    final estadisticas = json['stats'] as List;
+
     return Pokemon(
       id: json['id'],
       nombre: json['name'],
