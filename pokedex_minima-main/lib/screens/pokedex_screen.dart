@@ -155,9 +155,26 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                            const SizedBox(height: 20),
 
-                                const SizedBox(height: 10),
+                                const Text(
+                                  'Puntos de vida (HP)',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
 
+                                const SizedBox(height: 8),
+
+                                Text(
+                                  '${pokemon.vida} HP',
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    color: Colors.green,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                                 Wrap(
                                   alignment: WrapAlignment.center,
                                   spacing: 8,

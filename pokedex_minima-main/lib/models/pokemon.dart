@@ -1,4 +1,3 @@
-
 class Pokemon {
   final int id;
   final String nombre;
@@ -8,6 +7,7 @@ class Pokemon {
   final double peso;
   final int experienciaBase;
   final List<String> habilidades;
+  final int vida;
 
   Pokemon({
     required this.id,
@@ -18,6 +18,7 @@ class Pokemon {
     required this.peso,
     required this.experienciaBase,
     required this.habilidades,
+    required this.vida,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -39,6 +40,9 @@ class Pokemon {
           .map((habilidad) =>
               habilidad['ability']['name'] as String)
           .toList(),
+      vida: estadisticas.firstWhere(
+        (stat) => stat['stat']['name'] == 'hp',
+      )['base_stat'] as int,
     );
   }
 }
