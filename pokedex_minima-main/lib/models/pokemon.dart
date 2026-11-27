@@ -1,3 +1,4 @@
+
 class Pokemon {
   final int id;
   final String nombre;
@@ -5,9 +6,9 @@ class Pokemon {
   final List<String> tipos;
   final double altura;
   final double peso;
-  final int experienciaBase;
+  final int experiencia;
   final List<String> habilidades;
-  final int vida;
+  final Map<String, int> estadisticas;
 
   Pokemon({
     required this.id,
@@ -16,33 +17,37 @@ class Pokemon {
     required this.tipos,
     required this.altura,
     required this.peso,
-    required this.experienciaBase,
+    required this.experiencia,
     required this.habilidades,
-    required this.vida,
+    required this.estadisticas,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
-    final estadisticas = json['stats'] as List;
+    final sprites = json['sprites'] ?? {};
+    final other = sprites['other'] ?? {};
+    final artwork = other['official-artwork'] ?? {};
+
+    final stats = <String, int>{};
+    for (final item in (json['stats'] as List? ?? [])) {
+      stats[item['stat']['name']] = item['base_stat'];
+    }
 
     return Pokemon(
-      id: json['id'],
-      nombre: json['name'],
-      imagen: json['sprites']['other']
-              ['official-artwork']['front_default'] ??
-          json['sprites']['front_default'] ?? '',
-      tipos: (json['types'] as List)
-          .map((tipo) => tipo['type']['name'] as String)
+      id: json['id'] ?? 0,
+      nombre: json['name'] ?? '',
+      imagen: artwork['front_default'] ??
+          sprites['front_default'] ??
+          '',
+      tipos: (json['types'] as List? ?? [])
+          .map((tipo) => tipo['type']['name'].toString())
           .toList(),
-      altura: (json['height'] as num).toDouble() / 10,
-      peso: (json['weight'] as num).toDouble() / 10,
-      experienciaBase: json['base_experience'] ?? 0,
-      habilidades: (json['abilities'] as List)
-          .map((habilidad) =>
-              habilidad['ability']['name'] as String)
+      altura: (json['height'] ?? 0) / 10,
+      peso: (json['weight'] ?? 0) / 10,
+      experiencia: json['base_experience'] ?? 0,
+      habilidades: (json['abilities'] as List? ?? [])
+          .map((item) => item['ability']['name'].toString())
           .toList(),
-      vida: estadisticas.firstWhere(
-        (stat) => stat['stat']['name'] == 'hp',
-      )['base_stat'] as int,
+      estadisticas: stats,
     );
   }
 }
