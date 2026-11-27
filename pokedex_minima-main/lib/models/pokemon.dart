@@ -1,3 +1,4 @@
+
 class Pokemon {
   final int id;
   final String nombre;
@@ -6,6 +7,7 @@ class Pokemon {
   final double altura;
   final double peso;
   final int experienciaBase;
+  final List<String> habilidades;
 
   Pokemon({
     required this.id,
@@ -15,6 +17,7 @@ class Pokemon {
     required this.altura,
     required this.peso,
     required this.experienciaBase,
+    required this.habilidades,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -30,6 +33,10 @@ class Pokemon {
       altura: (json['height'] as num).toDouble() / 10,
       peso: (json['weight'] as num).toDouble() / 10,
       experienciaBase: json['base_experience'] ?? 0,
+      habilidades: (json['abilities'] as List)
+          .map((habilidad) =>
+              habilidad['ability']['name'] as String)
+          .toList(),
     );
   }
 }

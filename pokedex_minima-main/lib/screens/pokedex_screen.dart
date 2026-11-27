@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import '../models/pokemon.dart';
@@ -90,8 +91,6 @@ class _PokedexScreenState extends State<PokedexScreen> {
 
                           return SingleChildScrollView(
                             child: Column(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.center,
                               children: [
                                 Image.network(
                                   pokemon.imagen,
@@ -145,6 +144,34 @@ class _PokedexScreenState extends State<PokedexScreen> {
                                 Text(
                                   'Experiencia base: ${pokemon.experienciaBase} XP',
                                   style: const TextStyle(fontSize: 18),
+                                ),
+
+                                const SizedBox(height: 20),
+
+                                const Text(
+                                  'Habilidades',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+
+                                const SizedBox(height: 10),
+
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  spacing: 8,
+                                  children: pokemon.habilidades.map(
+                                    (habilidad) {
+                                      return Chip(
+                                        avatar: const Icon(
+                                          Icons.flash_on,
+                                          size: 18,
+                                        ),
+                                        label: Text(habilidad),
+                                      );
+                                    },
+                                  ).toList(),
                                 ),
                               ],
                             ),
