@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import '../models/pokemon.dart';
@@ -70,8 +69,6 @@ class _PokedexScreenState extends State<PokedexScreen> {
                   : FutureBuilder<Pokemon>(
                       future: _futuroPokemon,
                       builder: (context, snapshot) {
-
-                        // Estado de carga
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
                           return const Center(
@@ -79,7 +76,6 @@ class _PokedexScreenState extends State<PokedexScreen> {
                           );
                         }
 
-                        // Estado de error
                         if (snapshot.hasError) {
                           return Center(
                             child: Text(
@@ -89,13 +85,13 @@ class _PokedexScreenState extends State<PokedexScreen> {
                           );
                         }
 
-                        // Estado de éxito
                         if (snapshot.hasData) {
                           final pokemon = snapshot.data!;
 
                           return SingleChildScrollView(
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.center,
                               children: [
                                 Image.network(
                                   pokemon.imagen,
@@ -134,18 +130,21 @@ class _PokedexScreenState extends State<PokedexScreen> {
 
                                 Text(
                                   'Altura: ${pokemon.altura.toStringAsFixed(1)} m',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                  ),
+                                  style: const TextStyle(fontSize: 18),
                                 ),
 
                                 const SizedBox(height: 8),
 
                                 Text(
                                   'Peso: ${pokemon.peso.toStringAsFixed(1)} kg',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                  ),
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+
+                                const SizedBox(height: 8),
+
+                                Text(
+                                  'Experiencia base: ${pokemon.experienciaBase} XP',
+                                  style: const TextStyle(fontSize: 18),
                                 ),
                               ],
                             ),
