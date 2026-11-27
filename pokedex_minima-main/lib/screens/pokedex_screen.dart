@@ -13,158 +13,46 @@ class PokedexScreen extends StatefulWidget {
 class _PokedexScreenState extends State<PokedexScreen> {
   final TextEditingController _controlador = TextEditingController();
   final PokeApiService _servicio = PokeApiService();
-  Future<Pokemon>? _futuroPokemon;
 
-  void _buscar() {
-    final nombre = _controlador.text.trim();
-    if (nombre.isEmpty) return;
-    setState(() => _futuroPokemon = _servicio.obtenerPokemon(nombre));
-  }
+  Pokemon? pokemon;
+  bool cargando = false;
+  String error = '';
 
-  void _limpiar() {
-    setState(() {
-      _controlador.clear();
-      _futuroPokemon = null;
-    });
-  }
+  Future<void> buscarPokemon() async {
+    final nombre = _controlador.text.trim().toLowerCase();
 
-  Color _colorTipo(String tipo) {
-    switch (tipo.toLowerCase()) {
-      case 'fire': return Colors.deepOrange;
-      case 'water': return Colors.blue;
-      case 'grass': return Colors.green;
-      case 'electric': return Colors.amber;
-      case 'psychic': return Colors.purple;
-      case 'ice': return Colors.cyan;
-      case 'fighting': return Colors.brown;
-      case 'poison': return Colors.deepPurple;
-      case 'ground': return Colors.orange;
-      case 'rock': return Colors.blueGrey;
-      case 'fairy': return Colors.pink;
-      case 'flying': return Colors.indigo;
-      case 'bug': return Colors.lightGreen;
-      case 'ghost': return Colors.deepPurpleAccent;
-      case 'dragon': return Colors.teal;
-      case 'dark': return Colors.black87;
-      case 'steel': return Colors.grey;
-      default: return Colors.green;
+    if (nombre.isEmpty) {
+      setState(() {
+        error = 'Escribe el nombre o número de un Pokémon';
+        pokemon = null;
+      });
+      return;
     }
-  }
 
-  Widget _dato(String titulo, String valor) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(titulo,
-                style: const TextStyle(fontWeight: FontWeight.w500)),
-          ),
-          Flexible(
-            child: Text(valor,
-                textAlign: TextAlign.end,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
+    setState(() {
+      cargando = true;
+      error = '';
+      pokemon = null;
+    });
 
-  Widget _seccion(String titulo, List<Widget> elementos) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.75),
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(titulo,
-              style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold)),
-          const Divider(),
-          ...elementos,
-        ],
-      ),
-    );
-  }
+    try {
+      final resultado = await _servicio.obtenerPokemon(nombre);
 
-  Widget _tarjetaPokemon(Pokemon p) {
-    final color = p.tipos.isNotEmpty
-        ? _colorTipo(p.tipos.first)
-        : Colors.green;
+      if (!mounted) return;
 
-    return SingleChildScrollView(
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 20),
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: color.withOpacity(0.4)),
-        ),
-        child: Column(
-          children: [
-            Text('#${p.id.toString().padLeft(3, '0')}',
-                style: TextStyle(
-                    color: color,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
-            if (p.imagen.isNotEmpty)
-              Image.network(
-                p.imagen,
-                height: 190,
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) =>
-                    const Icon(Icons.catching_pokemon, size: 120),
-              ),
-            Text(
-              p.nombre.toUpperCase(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 26, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: p.tipos.map((tipo) {
-                return Chip(
-                  label: Text(tipo.toUpperCase()),
-                  backgroundColor: _colorTipo(tipo).withOpacity(0.25),
-                );
-              }).toList(),
-            ),
-            _seccion('Información general', [
-              _dato('Altura', '${p.altura} m'),
-              _dato('Peso', '${p.peso} kg'),
-              _dato('Experiencia', '${p.experiencia} puntos'),
-              _dato('Habilidades', p.habilidades.join(', ')),
-            ]),
-            _seccion('Estadísticas', [
-              _dato('Vida', '${p.estadisticas['hp'] ?? 0}'),
-              _dato('Ataque', '${p.estadisticas['attack'] ?? 0}'),
-              _dato('Defensa', '${p.estadisticas['defense'] ?? 0}'),
-              _dato('Velocidad', '${p.estadisticas['speed'] ?? 0}'),
-              _dato('Ataque especial',
-                  '${p.estadisticas['special-attack'] ?? 0}'),
-              _dato('Defensa especial',
-                  '${p.estadisticas['special-defense'] ?? 0}'),
-            ]),
-            _seccion('Movimientos', [
-              ...p.movimientos.map((m) => ListTile(
-                    dense: true,
-                    leading: const Icon(Icons.flash_on),
-                    title: Text(m),
-                  )),
-            ]),
-          ],
-        ),
-      ),
-    );
+      setState(() {
+        pokemon = resultado;
+        cargando = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        pokemon = null;
+        cargando = false;
+        error = 'No se encontró el Pokémon. Intenta nuevamente.';
+      });
+    }
   }
 
   @override
@@ -176,83 +64,294 @@ class _PokedexScreenState extends State<PokedexScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F4F4),
+      backgroundColor: const Color(0xFFF3F4F8),
       appBar: AppBar(
-        title: const Text('Mi Pokédex'),
+        title: const Text(
+          'Pokédex',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.red,
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFFDC3545),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _controlador,
-              decoration: InputDecoration(
-                labelText: 'Escribe el nombre del Pokémon',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(15),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.catching_pokemon,
+                size: 75,
+                color: Color(0xFFDC3545),
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                '¡Encuentra tu Pokémon!',
+                style: TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              onSubmitted: (_) => _buscar(),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: _buscar,
-                    icon: const Icon(Icons.search),
-                    label: const Text('Buscar'),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: Colors.red,
+
+              const SizedBox(height: 8),
+
+              const Text(
+                'Busca por nombre o número de Pokédex',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+
+              const SizedBox(height: 25),
+
+              TextField(
+                controller: _controlador,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => buscarPokemon(),
+                decoration: InputDecoration(
+                  hintText: 'Ejemplo: pikachu o 25',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: cargando ? null : buscarPokemon,
+                  icon: const Icon(Icons.search),
+                  label: const Text(
+                    'Buscar Pokémon',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFDC3545),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                OutlinedButton.icon(
-                  onPressed: _limpiar,
-                  icon: const Icon(Icons.clear),
-                  label: const Text('Limpiar'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: _futuroPokemon == null
-                  ? const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.catching_pokemon,
-                              size: 90, color: Colors.red),
-                          SizedBox(height: 10),
-                          Text('Busca tu Pokémon favorito'),
-                        ],
-                      ),
-                    )
-                  : FutureBuilder<Pokemon>(
-                      future: _futuroPokemon,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
+              ),
 
-                        if (snapshot.hasError || !snapshot.hasData) {
-                          return const Center(
-                              child: Text(
-                                  'No se encontró el Pokémon. Intenta nuevamente.'));
-                        }
+              const SizedBox(height: 25),
 
-                        return _tarjetaPokemon(snapshot.data!);
-                      },
+              if (cargando)
+                const Column(
+                  children: [
+                    CircularProgressIndicator(
+                      color: Color(0xFFDC3545),
                     ),
+                    SizedBox(height: 12),
+                    Text('Buscando Pokémon...'),
+                  ],
+                ),
+
+              if (error.isNotEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    error,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+
+              if (pokemon != null)
+                tarjetaPokemon(pokemon!),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget tarjetaPokemon(Pokemon p) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            '#${p.id.toString().padLeft(3, '0')}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
             ),
-          ],
+          ),
+
+          const SizedBox(height: 10),
+
+          if (p.imagen.isNotEmpty)
+            Image.network(
+              p.imagen,
+              height: 190,
+              width: 190,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return const Icon(
+                  Icons.image_not_supported,
+                  size: 100,
+                  color: Colors.grey,
+                );
+              },
+            ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            p.nombre.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Wrap(
+            spacing: 8,
+            children: p.tipos.map((tipo) {
+              return Chip(
+                label: Text(
+                  tipo.toUpperCase(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+                backgroundColor: const Color(0xFFDC3545),
+              );
+            }).toList(),
+          ),
+
+          const Divider(height: 30),
+
+          filaDato('Altura', '${p.altura} m'),
+          filaDato('Peso', '${p.peso} kg'),
+          filaDato('Experiencia base', '${p.experiencia}'),
+
+          const Divider(height: 30),
+
+          seccionTitulo('Habilidades'),
+          Wrap(
+            spacing: 6,
+            children: p.habilidades.map((habilidad) {
+              return Chip(label: Text(habilidad));
+            }).toList(),
+          ),
+
+          const Divider(height: 30),
+
+          seccionTitulo('Estadísticas'),
+
+          ...p.estadisticas.entries.map((stat) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 7),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        stat.key.replaceAll('-', ' ').toUpperCase(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text('${stat.value}'),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  LinearProgressIndicator(
+                    value: (stat.value / 255).clamp(0.0, 1.0),
+                    minHeight: 8,
+                    backgroundColor: Colors.grey.shade200,
+                    color: const Color(0xFFDC3545),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ],
+              ),
+            );
+          }),
+
+          const Divider(height: 30),
+
+          seccionTitulo('Movimientos'),
+
+          Wrap(
+            spacing: 6,
+            children: p.movimientos.map((movimiento) {
+              return Chip(
+                label: Text(movimiento.replaceAll('-', ' ')),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget filaDato(String titulo, String valor) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 7),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            titulo,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Text(valor),
+        ],
+      ),
+    );
+  }
+
+  Widget seccionTitulo(String titulo) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          titulo,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
